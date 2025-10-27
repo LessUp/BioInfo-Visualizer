@@ -1,0 +1,20 @@
+{
+  "name": "bioinfo-visualizer",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "slides/*"
+  ],
+  "scripts": {
+    "dev:picard": "npm run -w picard-workflow-spa dev",
+    "dev:bwa": "npm run -w bwa-algorithm-viz dev",
+    "dev:arith": "npm run -w arith-compress-viz dev",
+    "dev:slides": "npm run -w slides-ngs-vs-tgs dev",
+    "dev:gatk": "npm run -w gatk-run-dashboard dev",
+    "dev:align": "npm run -w genome-align-viz dev",
+    "dev:bioinfo": "npm run -w bioinfo-pipeline-web dev",
+    "format": "npx prettier . -w",
+    "format:check": "npx prettier . -c"
+  }
+}

@@ -46,8 +46,20 @@
   - ```bash
     cd apps/gatk-run-dashboard # 或 genome-align-viz
     npm i
-    npm run dev   # 默认 5173/5174 端口
+    npm run dev   # genome-align-viz: 5173 (预览 5174)；gatk-run-dashboard: 5176 (预览 5177)
     ```
+
+## 工作区脚本（根目录）
+
+使用 npm workspaces 可以在根目录快速启动各模块的开发服务器：
+
+- `npm run dev:picard` → apps/picard-workflow-spa（静态，端口 5170）
+- `npm run dev:bwa` → apps/bwa-algorithm-viz（静态，端口 5171）
+- `npm run dev:arith` → apps/arith-compress-viz（静态，端口 5172）
+- `npm run dev:slides` → slides/ngs-vs-tgs（静态，端口 5175）
+- `npm run dev:align` → apps/genome-align-viz（Vite，端口 5173/预览 5174）
+- `npm run dev:gatk` → apps/gatk-run-dashboard（Vite，端口 5176/预览 5177）
+- `npm run dev:bioinfo` → apps/bioinfo-pipeline-web（Next.js，端口 3000）
 
 ## 模块简介
 
@@ -72,3 +84,19 @@
 ## 许可证
 
 本仓库默认使用 MIT 许可证（见根目录 LICENSE）。如某些子模块另有许可证或第三方依赖限制，请以其目录下说明为准。
+
+## 部署（GitHub Pages）
+
+- 已添加工作流 `.github/workflows/pages.yml`，默认在 `main/master` 推送时打包并发布到 Pages。
+- 首次启用：在 GitHub 仓库 Settings → Pages，Source 选择 GitHub Actions。
+- 构建内容：
+  - 静态模块与 slides 直接复制至 `pages/` 子路径。
+  - Vite 模块（`gatk-run-dashboard`、`genome-align-viz`）构建后拷贝 `dist/`。
+  - 根 `pages/index.html` 汇总入口，访问地址形如 `https://<user>.github.io/<repo>/`。
+- 注意：如某些页面需跨域数据访问，请在本地开发模式下通过代理运行或在生产环境配置同源网关。
+
+## 开发容器（Dev Container）
+
+- 已提供 `.devcontainer/`（Node 20），推荐在 VS Code 中使用 Dev Containers 扩展一键打开。
+- 端口已预开放：3000、5170-5177。
+- 首次进入容器会自动执行 `npm i` 以安装工作区依赖。

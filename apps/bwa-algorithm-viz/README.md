@@ -11,12 +11,14 @@
 - **日志与步骤控制**：逐步播放/暂停/单步执行回溯流程，实时记录关键事件。
 
 ## 快速开始
-1. 克隆仓库：
-   ```bash
-   git clone https://github.com/<your-account>/bwa-web.git
-   ```
-2. 打开 `index.html`（直接双击或通过浏览器打开）。
-3. 在页面左上角输入参考序列与读段，点击“生成步骤”即可查看各类可视化。
+方式一：直接打开 `index.html`（建议使用 Chrome/Edge）。
+
+方式二：本地静态服务器（推荐）
+```bash
+npm run dev   # 使用 npx serve 在本目录启动，默认 http://localhost:5171
+```
+
+打开页面后，在左上角输入参考序列与读段，点击“生成步骤”即可查看各类可视化。
 
 > 本项目为静态站点，不需要构建/打包或额外依赖。若需部署到 GitHub Pages，可直接推送到 `gh-pages` 分支或启用主分支静态托管。
 
@@ -49,4 +51,4 @@ apps/bwa-algorithm-viz/
   - 性能优化（大规模序列下的虚拟滚动/抽样）。
 
 ## 许可证
-请根据自身需求选择合适的开源协议（建议添加至仓库根目录的 `LICENSE` 文件）。若不确定，可参考 [Choose an open source license](https://choosealicense.com/)。
+本项目遵循仓库根目录的 LICENSE（MIT）。如含第三方依赖，请同时遵循其许可证要求。

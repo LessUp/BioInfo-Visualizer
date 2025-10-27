@@ -1,4 +1,4 @@
-# Bioinfo Web
+# Bioinfo Pipeline Web
 
 基于 Next.js + Tailwind + ECharts 的生物信息“基因分析全流程”前端示例。
 
@@ -49,7 +49,7 @@ src/
 
 ## 许可协议
 
-MIT，详见 `LICENSE`。
+遵循仓库根目录的 LICENSE（MIT）。
 
 ---
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).

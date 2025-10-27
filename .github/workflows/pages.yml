@@ -1,0 +1,95 @@
+name: Deploy Pages
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (workspaces)
+        run: npm i
+
+      - name: Build Vite apps
+        run: |
+          npm run -w gatk-run-dashboard build
+          npm run -w genome-align-viz build
+
+      - name: Prepare Pages artifact
+        run: |
+          set -e
+          mkdir -p pages/apps pages/slides
+          # Static apps: copy as-is
+          cp -R apps/picard-workflow-spa pages/apps/picard-workflow-spa
+          cp -R apps/bwa-algorithm-viz pages/apps/bwa-algorithm-viz
+          cp -R apps/arith-compress-viz pages/apps/arith-compress-viz
+          # Vite builds: copy dist
+          mkdir -p pages/apps/gatk-run-dashboard && cp -R apps/gatk-run-dashboard/dist/* pages/apps/gatk-run-dashboard/
+          mkdir -p pages/apps/genome-align-viz && cp -R apps/genome-align-viz/dist/* pages/apps/genome-align-viz/
+          # Slides
+          cp -R slides/ngs-vs-tgs pages/slides/ngs-vs-tgs
+          # Root index
+          cat > pages/index.html <<'HTML'
+          <!doctype html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Bioinfo Visualizer</title>
+            <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;max-width:860px;margin:40px auto;padding:0 16px;line-height:1.6}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.card{border:1px solid #e5e7eb;border-radius:12px;padding:16px}.card h3{margin:0 0 8px}.muted{color:#6b7280}</style>
+          </head>
+          <body>
+            <h1>Bioinfo Visualizer</h1>
+            <p class="muted">教学/演示用可视化集合。选择一个模块进入：</p>
+            <div class="grid">
+              <div class="card"><h3>Picard Workflow SPA</h3><a href="./apps/picard-workflow-spa/index.html">打开</a></div>
+              <div class="card"><h3>BWA Algorithm Viz</h3><a href="./apps/bwa-algorithm-viz/index.html">打开</a></div>
+              <div class="card"><h3>Arithmetic Compression Viz</h3><a href="./apps/arith-compress-viz/index.html">打开</a></div>
+              <div class="card"><h3>GATK Run Dashboard</h3><a href="./apps/gatk-run-dashboard/">打开</a></div>
+              <div class="card"><h3>Genome Align Viz</h3><a href="./apps/genome-align-viz/">打开</a></div>
+              <div class="card"><h3>Slides: NGS vs TGS</h3><a href="./slides/ngs-vs-tgs/index.html">打开</a></div>
+            </div>
+            <p class="muted">提示：如页面依赖跨域资源访问，请在本地开发模式下使用代理配置运行。</p>
+          </body>
+          </html>
+          HTML
+          # Disable Jekyll processing
+          touch pages/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
