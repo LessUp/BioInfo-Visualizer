@@ -1,18 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReadAlignment } from '../types/events'
 import type { VariantItem } from './VariantPanel'
-
-function cigarAlignedLength(cigar: string): number {
-  const re = /(\d+)([MIDNSHP=X])/g
-  let len = 0
-  let m: RegExpExecArray | null
-  while ((m = re.exec(cigar))) {
-    const n = parseInt(m[1], 10)
-    const op = m[2]
-    if (op === 'M' || op === '=' || op === 'X' || op === 'D' || op === 'N') len += n
-  }
-  return len
-}
+import { alignedLengthFromCigar } from '../utils/cigar'
 
 function useResize(elRef: React.RefObject<HTMLElement>) {
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 300, h: 200 })
@@ -54,7 +43,7 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
     const laneIndex: number[] = new Array(sorted.length)
     for (let i = 0; i < sorted.length; i++) {
       const r = sorted[i]
-      const len = cigarAlignedLength(r.cigar)
+      const len = alignedLengthFromCigar(r.cigar)
       const rEnd = r.pos + len
       let assigned = 0
       for (let l = 0; l < ends.length; l++) {
@@ -101,7 +90,7 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
       const r = lanes.sorted[i]
       const lane = lanes.laneIndex[i]
       const y = 24 + lane * (laneH + gap)
-      const len = cigarAlignedLength(r.cigar)
+      const len = alignedLengthFromCigar(r.cigar)
       const x1 = Math.max(0, xScale(r.pos))
       const x2 = Math.min(w, xScale(r.pos + len))
       // bar
@@ -173,7 +162,7 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
     for (let i = 0; i < lanes.sorted.length; i++) {
       if (lanes.laneIndex[i] !== lane) continue
       const r = lanes.sorted[i]
-      const len = cigarAlignedLength(r.cigar)
+      const len = alignedLengthFromCigar(r.cigar)
       if (gp >= r.pos && gp <= r.pos + len) { found = r; break }
     }
     setHover({ x, y, r: found })

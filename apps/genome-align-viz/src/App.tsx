@@ -10,6 +10,7 @@ import { useAppStore } from './store/useAppStore'
 import VariantPanel, { type VariantItem } from './components/VariantPanel'
 import type { AlignChunkEvent, CoverageUpdateEvent, PipelineStepName, PipelineStatus, ReadAlignment, StreamEvent } from './types/events'
 import { startStream } from './streams/streamClient'
+import { alignedLengthFromCigar } from './utils/cigar'
 
 type Step = { name: PipelineStepName; status: PipelineStatus; progress?: number }
 
@@ -66,7 +67,7 @@ export default function App() {
         // mismatch rate（按读段错配数/对齐碱基数近似）
         for (const r of ev.payload.reads) {
           const mism = r.mismatches?.length ?? 0
-          const len = approxAlignedLength(r.cigar)
+          const len = alignedLengthFromCigar(r.cigar)
           totalMismatches += mism
           totalAligned += len
         }
@@ -124,16 +125,4 @@ export default function App() {
       <LogPanel logs={logs} />
     </div>
   )
-}
-
-function approxAlignedLength(cigar: string): number {
-  const re = /(\d+)([MIDNSHP=X])/g
-  let len = 0
-  let m: RegExpExecArray | null
-  while ((m = re.exec(cigar))) {
-    const n = parseInt(m[1], 10)
-    const op = m[2]
-    if (op === 'M' || op === '=' || op === 'X' || op === 'D' || op === 'N') len += n
-  }
-  return len
 }

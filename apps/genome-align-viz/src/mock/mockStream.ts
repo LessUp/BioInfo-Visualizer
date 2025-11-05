@@ -1,4 +1,5 @@
 import type { StreamEvent, PipelineStepName, ReadAlignment } from '../types/events'
+import { alignedLengthFromCigar } from '../utils/cigar'
 
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
 function choice<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)] }
@@ -13,18 +14,6 @@ function makeCigar(): string {
   if (hasDel) cigar += `${randInt(1, 3)}D`
   cigar += `${m2}M`
   return cigar
-}
-
-function cigarAlignedLength(cigar: string): number {
-  const re = /(\d+)([MIDNSHP=X])/g
-  let len = 0
-  let m: RegExpExecArray | null
-  while ((m = re.exec(cigar))) {
-    const n = parseInt(m[1], 10)
-    const op = m[2]
-    if (op === 'M' || op === '=' || op === 'X' || op === 'D' || op === 'N') len += n
-  }
-  return len
 }
 
 export function startMockStream(jobId: string, onEvent: (e: StreamEvent) => void, regionArg?: { chrom: string; start: number; end: number }) {
@@ -67,7 +56,7 @@ export function startMockStream(jobId: string, onEvent: (e: StreamEvent) => void
         // coverage update based on reads
         const bins: { start: number; cov: number }[] = []
         for (const r of reads) {
-          const len = cigarAlignedLength(r.cigar)
+          const len = alignedLengthFromCigar(r.cigar)
           const rStart = r.pos
           const rEnd = r.pos + len
           for (let s = Math.floor(rStart / binSize) * binSize; s <= rEnd; s += binSize) {
