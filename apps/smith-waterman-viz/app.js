@@ -117,5 +117,10 @@
   els.stepBtn.addEventListener('click', step);
   els.resetBtn.addEventListener('click', reset);
 
+  function applyPreset(a, b){ els.seqA.value=a; els.seqB.value=b; buildMatrix(); }
+  if(els.preset1) els.preset1.addEventListener('click', ()=> applyPreset('GATTACA','GCATGCU'));
+  if(els.preset2) els.preset2.addEventListener('click', ()=> applyPreset('BAOBAB','BAHABA'));
+  if(els.preset3) els.preset3.addEventListener('click', ()=> applyPreset('AAAAAA','AAAA'));
+
   buildMatrix();
 })();
