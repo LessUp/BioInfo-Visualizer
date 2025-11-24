@@ -5,7 +5,44 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, BookOpen, FileText, GitBranch, Activity, Search, ChevronRight, PlayCircle, AlertCircle } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import MermaidDiagram from '@/components/ui/MermaidDiagram';
 import { cn } from '@/lib/utils';
+
+const OVERVIEW_CHART = `
+graph LR
+    A(Raw Data<br/>FASTQ) --> B{QC & Trimming<br/>FastQC/Trimmomatic}
+    B -->|Clean Reads| C[Alignment<br/>BWA-MEM]
+    C --> D(BAM File)
+    D --> E{Variant Calling<br/>GATK}
+    E --> F[VCF File]
+    
+    style A fill:#f8fafc,stroke:#94a3b8,stroke-width:2px
+    style B fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style C fill:#f0fdf4,stroke:#4ade80,stroke-width:2px
+    style D fill:#f8fafc,stroke:#94a3b8,stroke-width:2px
+    style E fill:#fff7ed,stroke:#fb923c,stroke-width:2px
+    style F fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px
+`;
+
+const VARIANT_CALLING_CHART = `
+graph TD
+    subgraph "Active Region Identification"
+        A[Input BAM] --> B{Active Region?}
+    end
+    subgraph "Local Assembly"
+        B -->|Yes| C[Build De Bruijn Graph]
+        C --> D[Find Candidate Haplotypes]
+    end
+    subgraph "Genotyping"
+        D --> E[PairHMM Likelihoods]
+        E --> F[Assign Genotypes]
+    end
+    F --> G[Output VCF]
+
+    style B fill:#eff6ff,stroke:#60a5fa
+    style C fill:#f0fdf4,stroke:#4ade80
+    style E fill:#fff7ed,stroke:#fb923c
+`;
 
 const TOC = [
   { id: 'intro', title: '1. NGS 流程概览' },
@@ -102,28 +139,8 @@ export default function NgsAnalysisGuidePage() {
                 下一代测序 (Next-Generation Sequencing, NGS) 技术产生了海量的短序列片段。
                 生物信息学分析的核心目标是将这些碎片拼接、比对回参考基因组，并找出样本与参考基因组之间的差异（即变异）。
               </p>
-              <div className="not-prose my-6 rounded-xl bg-zinc-100 p-4 dark:bg-zinc-800/50">
-                <div className="flex flex-col items-center gap-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 md:flex-row md:justify-between">
-                  <div className="flex flex-col items-center gap-2">
-                    <FileText className="h-8 w-8 text-zinc-400" />
-                    <span>Raw Data (FASTQ)</span>
-                  </div>
-                  <ChevronRight className="hidden md:block" />
-                  <div className="flex flex-col items-center gap-2">
-                    <Activity className="h-8 w-8 text-blue-500" />
-                    <span>QC & Trimming</span>
-                  </div>
-                  <ChevronRight className="hidden md:block" />
-                  <div className="flex flex-col items-center gap-2">
-                    <GitBranch className="h-8 w-8 text-purple-500" />
-                    <span>Alignment (BAM)</span>
-                  </div>
-                  <ChevronRight className="hidden md:block" />
-                  <div className="flex flex-col items-center gap-2">
-                    <Search className="h-8 w-8 text-emerald-500" />
-                    <span>Variant Calling (VCF)</span>
-                  </div>
-                </div>
+              <div className="not-prose my-6">
+                <MermaidDiagram chart={OVERVIEW_CHART} className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800" />
               </div>
             </Card>
           </motion.section>
@@ -212,6 +229,9 @@ export default function NgsAnalysisGuidePage() {
                 通过统计学模型判断某个位点的碱基与参考基因组不同是由于测序误差还是真实的生物学变异。
                 GATK HaplotypeCaller 是目前的行业金标准。
               </p>
+              <div className="mt-2">
+                <MermaidDiagram chart={VARIANT_CALLING_CHART} className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800" />
+              </div>
               <div className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">局部组装 (Local Assembly)</h4>
                  <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
